@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" style="scroll-padding-top: 5rem;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinmay Panda | Security Analyst & Penetration Tester</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#08080c',
+                            card: '#10111a',
+                            cardHover: '#161826',
+                            border: '#1f2438',
+                            red: '#ff2a4b',
+                            green: '#00ff66',
+                            greenMuted: '#00cc52',
+                            dark: '#030305',
+                            accent: '#1e2235'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                        display: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #08080c;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* CRT Scanline Overlay */
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.35) 50%,
+                rgba(0, 0, 0, 0.35)
+            );
+            background-size: 100% 4px;
+        }
+
+        /* Cyber Glow Effects */
+        .glow-red {
+            text-shadow: 0 0 12px rgba(255, 42, 75, 0.6), 0 0 25px rgba(255, 42, 75, 0.3);
+        }
+
+        .glow-green {
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.7), 0 0 20px rgba(0, 255, 102, 0.3);
+        }
+
+        .border-glow-green:hover {
+            box-shadow: 0 0 18px rgba(0, 255, 102, 0.25);
+            border-color: rgba(0, 255, 102, 0.5);
+        }
+
+        .border-glow-red:hover {
+            box-shadow: 0 0 18px rgba(255, 42, 75, 0.25);
+            border-color: rgba(255, 42, 75, 0.5);
+        }
+
+        /* Matrix Canvas Background */
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.18;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08080c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2438;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff66;
+        }
+
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #00ff66;
+        }
+
+        /* ─── SECURITY ARSENAL TAB BUTTONS ─── */
+        .tab-btn {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid #1f2438;
+            color: #9ca3af;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+        }
+        .tab-btn:hover {
+            color: #ffffff;
+            border-color: #00ff66;
+        }
+        .tab-btn.active {
+            background: #00ff66;
+            color: #000000;
+            border-color: #00ff66;
+        }
+        .tab-btn.active .text-cyber-green,
+        .tab-btn.active .text-cyber-red {
+            color: #000000 !important;
+        }
+        .tab-btn.active span {
+            color: #000000 !important;
+        }
+
+        .tab-panel {
+            animation: tabFadeIn 0.25s ease-out;
+        }
+        @keyframes tabFadeIn {
+            0% { opacity: 0; transform: translateY(6px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="relative min-h-screen selection:bg-cyber-red selection:text-white">
+
+    <!-- Matrix Code Rain Canvas Background -->
+    <canvas id="bgCanvas"></canvas>
+    
+    <!-- CRT Scanline texture -->
+    <div class="fixed inset-0 scanline pointer-events-none z-10 opacity-30"></div>
+
+    <nav class="sticky top-0 z-50 backdrop-blur-md bg-cyber-bg/90 border-b border-cyber-border/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Terminal Tag -->
+                <a href="#hero" class="flex items-center space-x-2 text-cyber-green font-mono font-bold text-lg group">
+                    <span class="text-cyber-red font-display text-xl group-hover:animate-pulse">&gt;</span>
+                    <span>chinmay_panda<span class="animate-ping text-cyber-green">_</span></span>
+                </a>
+
+                <!-- Desktop Navigation Menu -->
+                <div class="hidden lg:flex items-center space-x-5 text-xs font-mono tracking-wider">
+                    <a href="#about" class="text-gray-400 hover:text-cyber-green transition-colors">[0x01] ABOUT</a>
+                    <a href="#achievements" class="text-gray-400 hover:text-cyber-green transition-colors">[0x02] CTF & HONORS</a>
+                    <a href="#certifications" class="text-gray-400 hover:text-cyber-green transition-colors">[0x03] CERTS</a>
+                    <a href="#publications" class="text-gray-400 hover:text-cyber-green transition-colors">[0x04] PAPERS</a>
+                    <a href="#projects" class="text-gray-400 hover:text-cyber-green transition-colors">[0x05] PROJECTS</a>
+                    <a href="#tools" class="text-gray-400 hover:text-cyber-green transition-colors">[0x06] ARSENAL</a>
+                    <a href="#blogs" class="text-gray-400 hover:text-cyber-green transition-colors">[0x07] WRITEUPS</a>
+                    <a href="#contact" class="px-3 py-1.5 rounded border border-cyber-green/50 text-cyber-green hover:bg-cyber-green/10 transition-all font-semibold">
+                        [CONTACT]
+                    </a>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="hidden md:flex lg:hidden items-center space-x-2 text-xs font-mono bg-cyber-card px-3 py-1 border border-cyber-border rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                    <span class="text-gray-300">OPEN TO WORK</span>
+                </div>
+
+                <!-- Mobile Menu Toggle Button -->
+                <button id="mobileMenuBtn" class="lg:hidden text-gray-300 hover:text-cyber-green p-2 focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobileMenu" class="hidden lg:hidden bg-cyber-card border-b border-cyber-border px-4 pt-2 pb-4 space-y-2 font-mono text-sm">
+            <a href="#about" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x01] ABOUT</a>
+            <a href="#achievements" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x02] CTF & HONORS</a>
+            <a href="#certifications" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x03] CERTIFICATIONS</a>
+            <a href="#publications" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x04] PUBLICATIONS</a>
+            <a href="#projects" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x05] PROJECTS</a>
+            <a href="#tools" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x06] ARSENAL</a>
+            <a href="#blogs" onclick="closeMobileMenu()" class="block text-gray-300 hover:text-cyber-green py-1">[0x07] WRITEUPS & PDFS</a>
+            <a href="#contact" onclick="closeMobileMenu()" class="block text-cyber-green font-bold py-1">[CONTACT]</a>
+        </div>
+    </nav>
+
+    <section id="hero" class="scroll-mt-24 relative z-20 min-h-[85vh] flex items-center px-4 py-8 sm:py-12 max-w-7xl mx-auto">
+        
+        <!-- Ambient Glow -->
+        <div class="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyber-red/10 blur-[130px] rounded-full pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
+            
+            <!-- Hero Content Text (First on mobile & desktop) -->
+            <div class="lg:col-span-7 flex flex-col items-start text-left order-1">
+                
+                <div class="inline-flex items-center space-x-2 bg-cyber-card/90 border border-cyber-green/40 px-3 py-1.5 rounded-md mb-4 backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-cyber-green animate-pulse"></span>
+                    <span class="text-xs font-mono text-cyber-green tracking-wider uppercase font-semibold">Available for SOC & Pentest Roles</span>
+                </div>
+
+                <!-- Straight Red Display Title -->
+                <h1 class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-display tracking-tight text-cyber-red glow-red uppercase mb-3 leading-none w-full sm:whitespace-nowrap">
+                    CHINMAY PANDA
+                </h1>
+
+                <!-- Cyber Subtitle -->
+                <p class="text-base sm:text-xl md:text-2xl font-mono text-cyber-green glow-green font-bold tracking-wide mb-5">
+                    SECURITY ANALYST <span class="text-cyber-red mx-1 sm:mx-2">|</span> PENETRATION TESTER
+                </p>
+
+                <!-- Concise Bio -->
+                <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 font-sans max-w-2xl">
+                    Passionate cybersecurity practitioner specializing in vulnerability assessment, web application security, Active Directory security, SIEM threat detection, and offensive research. Driven to decode attack vectors and defend modern digital infrastructures.
+                </p>
+
+                <!-- CTA Action Buttons -->
+                <div class="flex flex-wrap items-center gap-3 mb-6 w-full sm:w-auto">
+                    <a href="#contact" class="px-5 py-3 rounded bg-cyber-red text-white font-mono font-bold text-sm hover:bg-red-600 transition-all shadow-lg shadow-cyber-red/30 flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="fa-solid fa-paper-plane"></i> GET IN TOUCH
+                    </a>
+                    <a href="#projects" class="px-5 py-3 rounded bg-cyber-card border border-cyber-green/60 text-cyber-green font-mono font-bold text-sm hover:bg-cyber-green/10 transition-all border-glow-green flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="fa-solid fa-terminal"></i> VIEW PROJECTS
+                    </a>
+                    <button onclick="toggleTerminalModal()" class="px-4 py-3 rounded bg-cyber-card border border-cyber-border text-gray-300 font-mono text-sm hover:text-cyber-green transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="fa-solid fa-code"></i> CLI MODE
+                    </button>
+                </div>
+
+                <!-- Quick Profile Social Icons -->
+                <div class="flex items-center space-x-6 text-2xl text-gray-400 pt-2">
+                    <a href="https://www.linkedin.com/in/chinmaypanda01/" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-green transition-colors" title="LinkedIn Profile">
+                        <i class="fa-brands fa-linkedin"></i>
+                    </a>
+                    <a href="https://github.com/Chinmaypanda34" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-green transition-colors" title="GitHub Profile">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
+                    <a href="https://tryhackme.com/p/CHINMAY" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-green transition-colors" title="TryHackMe Profile">
+                        <i class="fa-solid fa-flag text-xl"></i>
+                    </a>
+                    <a href="https://www.credly.com/users/chinmay-panda.1082fc82/badges/credly" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-green transition-colors" title="Credly Credentials">
+                        <i class="fa-solid fa-certificate text-xl"></i>
+                    </a>
+                    <a href="https://medium.com/@chinmaypandarkl" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-green transition-colors" title="Medium Writeups">
+                        <i class="fa-brands fa-medium"></i>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Portrait Display HUD (Compact on Mobile, Right Column on Desktop) -->
+            <div class="lg:col-span-5 flex justify-center order-2">
+                <div class="relative group max-w-[260px] sm:max-w-xs md:max-w-sm w-full">
+                    
+                    <!-- Ambient Red/Green Glow Frame -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-cyber-red via-cyber-green to-cyber-red rounded-xl opacity-40 blur transition duration-500 group-hover:opacity-80"></div>
+                    
+                    <!-- Cyber Portrait Box -->
+                    <div class="relative w-full aspect-[4/5] rounded-xl overflow-hidden border-2 border-cyber-border bg-cyber-card flex flex-col items-center justify-between shadow-2xl">
+                        
+                        <!-- Image Element with Fallback (Photo stored at images/chinmay_photo.jpg) -->
+                        <img id="userPhoto"
+                             src="images/chinmay_photo.jpg"
+                             alt="Chinmay Panda" 
+                             class="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-700"
+                             onerror="this.src='https://placehold.co/500x620/10111a/00ff66?text=CHINMAY+PANDA';" />
+
+                        <!-- HUD Overlay Details -->
+                        <div class="absolute bottom-3 left-3 right-3 bg-black/85 backdrop-blur-md p-2 rounded-lg border border-cyber-border/80 font-mono text-[11px] text-gray-300 flex items-center justify-between">
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-2 h-2 rounded-full bg-cyber-green"></span>
+                                <span class="text-cyber-green font-bold">VERIFIED_OPERATIVE</span>
+                            </div>
+                            <span class="text-gray-400">ID: PANDA_01</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div id="terminalModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-3xl bg-cyber-card border border-cyber-green/50 rounded-lg shadow-2xl overflow-hidden font-mono text-sm">
+            <div class="bg-cyber-dark px-4 py-2 border-b border-cyber-border flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500 cursor-pointer" onclick="toggleTerminalModal()"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                    <span class="text-xs text-gray-400 ml-2">bash - chinmay@sec-station:~</span>
+                </div>
+                <button onclick="toggleTerminalModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="terminalOutput" class="p-4 h-80 overflow-y-auto terminal-scroll text-gray-300 space-y-2">
+                <p class="text-cyber-green">PandaSec OS v2.4 (x86_64-pc-linux-gnu)</p>
+                <p class="text-xs text-gray-500">Type <span class="text-cyber-red font-bold">'help'</span> for interactive security commands.</p>
+                <br>
+            </div>
+            <div class="px-4 py-3 bg-cyber-dark/80 border-t border-cyber-border flex items-center">
+                <span class="text-cyber-green font-bold mr-2">chinmay@security:~$</span>
+                <input id="terminalInput" type="text" class="bg-transparent text-gray-100 flex-1 focus:outline-none font-mono text-sm" placeholder="Try 'whoami', 'skills', 'achievements', 'certs', 'clear'..." autofocus />
+            </div>
+        </div>
+    </div>
+
+    <section id="about" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x01]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">WHO_AM_I</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 bg-cyber-card border border-cyber-border rounded-xl p-6 relative overflow-hidden hover:border-cyber-green/40 transition-all">
+                <div class="flex items-center space-x-2 text-cyber-green font-mono text-sm mb-4">
+                    <i class="fa-solid fa-user-ninja"></i>
+                    <span>$ cat profile.txt</span>
+                </div>
+                <p class="text-gray-300 leading-relaxed text-sm sm:text-base mb-4">
+                    Hello! I'm <strong class="text-cyber-red font-bold">Chinmay Panda</strong>, a Cybersecurity Analyst & Penetration Tester. I hold hands-on experience across web application penetration testing, Active Directory red teaming, network scanning, and SIEM monitoring (Wazuh, Splunk, Sentinel).
+                </p>
+                <p class="text-gray-300 leading-relaxed text-sm sm:text-base mb-6">
+                    I actively sharpen my skills on TryHackMe, PortSwigger Web Security Academy, and CTF competitions. I hold recognized industry certifications including <span class="text-cyber-green font-semibold">CompTIA Security+</span>, <span class="text-cyber-green font-semibold">eJPTv2</span>, and <span class="text-cyber-green font-semibold">Active Directory Red Team Specialist</span>.
+                </p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-cyber-border/80 text-xs font-mono">
+                    <div>
+                        <span class="text-gray-500 block">LOCATION</span>
+                        <span class="text-gray-200 font-semibold">India</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block">PRIMARY ROLES</span>
+                        <span class="text-cyber-green font-semibold">SOC Analyst / VPT / Pentester</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block">AVAILABILITY</span>
+                        <span class="text-cyber-red font-semibold">Open for Immediate Join</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 text-cyber-red font-mono text-sm mb-4">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <span>CORE DOMAINS</span>
+                    </div>
+                    <ul class="space-y-3 text-xs sm:text-sm text-gray-300 font-sans">
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-angle-right text-cyber-green mt-1 mr-2 text-xs"></i>
+                            <span>Web App & API Penetration Testing</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-angle-right text-cyber-green mt-1 mr-2 text-xs"></i>
+                            <span>Active Directory & Internal Network Exploitation</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-angle-right text-cyber-green mt-1 mr-2 text-xs"></i>
+                            <span>SIEM Log Analysis & Threat Detection Rules</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa-solid fa-angle-right text-cyber-green mt-1 mr-2 text-xs"></i>
+                            <span>Security Tool Automation (Python/Bash/PowerShell)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-cyber-border">
+                    <a href="https://www.linkedin.com/in/chinmaypanda01/" target="_blank" class="w-full py-2 bg-cyber-border hover:bg-cyber-green/20 hover:text-cyber-green text-center rounded font-mono text-xs text-gray-300 transition-all block">
+                        <i class="fa-brands fa-linkedin mr-1"></i> CONNECT ON LINKEDIN
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="achievements" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x02]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">ACHIEVEMENTS_&_CTFS</h3>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Achievements List (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                
+                <!-- Achievement Item 1 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex items-start space-x-4">
+                    <div class="p-3 bg-cyber-red/10 text-cyber-red rounded-lg text-2xl shrink-0 border border-cyber-red/30">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs text-cyber-green mb-1">
+                            <span>2024 - 2025</span>
+                            <span>•</span>
+                            <span class="text-cyber-red">PENTATHLON NATIONAL CTF</span>
+                        </div>
+                        <h4 class="text-white font-mono font-bold text-base mb-1">AICTE CTF (NCIIPC Pentathlon) — Top Rank</h4>
+                        <p class="text-gray-300 text-xs sm:text-sm font-sans">
+                            Secured <strong>Top 350</strong> in AICTE CTF 2024 and solved <strong>9 flags</strong> in Pentathlon 2025 ranking among the <strong>Top 300–400 participants nationwide</strong> in high-pressure national security challenges.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Achievement Item 2 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex items-start space-x-4">
+                    <div class="p-3 bg-cyber-green/10 text-cyber-green rounded-lg text-2xl shrink-0 border border-cyber-green/30">
+                        <i class="fa-solid fa-flag"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs text-cyber-green mb-1">
+                            <span>2025</span>
+                            <span>•</span>
+                            <span>TCS HACKQUEST</span>
+                        </div>
+                        <h4 class="text-white font-mono font-bold text-base mb-1">TCS HackQuest Season 9 — 7 Flags Solved</h4>
+                        <p class="text-gray-300 text-xs sm:text-sm font-sans">
+                            Successfully captured 7 Flags across Web Security, Forensics, and Privilege Escalation domains during TCS HackQuest Season 9 competition.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Achievement Item 3 -->
+                <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex items-start space-x-4">
+                    <div class="p-3 bg-cyber-red/10 text-cyber-red rounded-lg text-2xl shrink-0 border border-cyber-red/30">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs text-cyber-green mb-1">
+                            <span>2024</span>
+                            <span>•</span>
+                            <span>IIT JAMMU & DRDO</span>
+                        </div>
+                        <h4 class="text-white font-mono font-bold text-base mb-1">Participant — “Anveshanam-24”</h4>
+                        <p class="text-gray-300 text-xs sm:text-sm font-sans">
+                            Selected participant in “Anveshanam-24”, organized by <strong>IIT Jammu and DRDO</strong>, focusing on advanced cybersecurity, defense technology, and vulnerability research.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TryHackMe Profile & Exact Metrics Card (1 Col) -->
+            <div class="bg-cyber-card border border-cyber-green/50 rounded-xl p-6 flex flex-col justify-between border-glow-green">
+                <div>
+                    <div class="flex items-center justify-between border-b border-cyber-border pb-3 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-flag text-cyber-green text-xl"></i>
+                            <span class="text-white font-mono font-bold text-sm">TRYHACKME PROFILE</span>
+                        </div>
+                        <span class="text-[10px] font-mono bg-cyber-dark text-cyber-green px-2 py-1 rounded border border-cyber-border font-bold">LIVE STATS</span>
+                    </div>
+
+                    <div class="text-center py-2">
+                        <p class="text-[10px] font-mono text-gray-400 mb-1">HANDLE</p>
+                        <h4 class="text-2xl font-mono font-bold text-cyber-green glow-green mb-4">CHINMAY</h4>
+                    </div>
+
+                    <!-- THM Metrics Showcase Grid (Rank, Badges, Rooms) -->
+                    <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                        <div class="bg-cyber-dark p-2.5 rounded border border-cyber-border">
+                            <span class="block text-[10px] font-mono text-gray-400">RANK</span>
+                            <span class="text-sm sm:text-base font-mono font-bold text-white">#9,126</span>
+                        </div>
+                        <div class="bg-cyber-dark p-2.5 rounded border border-cyber-border">
+                            <span class="block text-[10px] font-mono text-gray-400">BADGES</span>
+                            <span class="text-sm sm:text-base font-mono font-bold text-cyber-green">32</span>
+                        </div>
+                        <div class="bg-cyber-dark p-2.5 rounded border border-cyber-border">
+                            <span class="block text-[10px] font-mono text-gray-400">ROOMS</span>
+                            <span class="text-sm sm:text-base font-mono font-bold text-cyber-red">260</span>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-300 font-sans text-center leading-relaxed">
+                        Active offensive practitioner solving Linux, Active Directory, Web Pentesting, and Privilege Escalation labs.
+                    </p>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-cyber-border">
+                    <a href="https://tryhackme.com/p/CHINMAY" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-cyber-green text-black font-mono font-bold text-xs text-center rounded hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
+                        <span>VIEW TRYHACKME PROFILE</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="certifications" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x03]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">CERTIFICATIONS_&_CREDENTIALS</h3>
+        </div>
+
+        <div class="space-y-4">
+            
+            <!-- Cert 1: CompTIA Security+ -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 rounded-xl p-2.5 flex items-center justify-center shrink-0 border border-cyber-border">
+                        <img src="https://images.credly.com/size/340x340/images/0068d892-496e-4927-9272-6a414ed3f9bb/CompTIA_Security_2Bce.png" 
+                             alt="CompTIA Security+" 
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://cdn.simpleicons.org/comptia/FF0000';" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs mb-1">
+                            <span class="text-cyber-green font-bold">[SY0-701]</span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-cyber-red font-semibold">CompTIA</span>
+                        </div>
+                        <h4 class="text-lg font-mono font-bold text-white mb-1">CompTIA Security+</h4>
+                        <p class="text-xs text-gray-300 font-sans max-w-2xl leading-relaxed">
+                            Global baseline security operations, network vulnerability identification, incident response, risk management, and governance.
+                        </p>
+                    </div>
+                </div>
+                <a href="https://www.credly.com/earner/earned/badge/6895ee86-1f01-4bb2-90e4-80822d465663" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-cyber-dark border border-cyber-green/50 text-cyber-green hover:bg-cyber-green hover:text-black font-mono font-bold text-xs rounded transition-all whitespace-nowrap self-end sm:self-center">
+                    &rarr; Verify Credential
+                </a>
+            </div>
+
+            <!-- Cert 2: Junior Penetration Tester (eJPTv2) -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 rounded-xl p-2.5 flex items-center justify-center shrink-0 border border-cyber-border">
+                        <img src="https://framerusercontent.com/images/zXeAusa9yM9ADvR9MZClXUYBbvw.png?width=400&height=323" 
+                             alt="INE eJPTv2" 
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://images.credly.com/size/340x340/images/40960cfd-8692-4f11-8c46-9509dfc9ea33/eJPT.png';" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs mb-1">
+                            <span class="text-cyber-green font-bold">[PRACTICAL PENTESTING]</span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-cyber-red font-semibold">INE Security</span>
+                        </div>
+                        <h4 class="text-lg font-mono font-bold text-white mb-1">Junior Penetration Tester (eJPTv2)</h4>
+                        <p class="text-xs text-gray-300 font-sans max-w-2xl leading-relaxed">
+                            100% practical hands-on penetration testing certification covering host & network enumeration, web app auditing, and privilege exploitation.
+                        </p>
+                    </div>
+                </div>
+                <a href="https://certs.ine.com/79886730-a113-4cd4-95e2-0b4a93dbd5d4#acc.u6YItwHf" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-cyber-dark border border-cyber-green/50 text-cyber-green hover:bg-cyber-green hover:text-black font-mono font-bold text-xs rounded transition-all whitespace-nowrap self-end sm:self-center">
+                    &rarr; Verify Credential
+                </a>
+            </div>
+
+            <!-- Cert 3: Active Directory Red Team Specialist -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-cyber-dark rounded-xl p-2.5 flex items-center justify-center shrink-0 border border-cyber-border">
+                        <img src="https://cyberwarfare.live/wp-content/uploads/2021/04/CWL-Logo-300x300.png" 
+                             alt="CyberWarfare Labs" 
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://placehold.co/100x100/10111a/00ff66?text=CWL';" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs mb-1">
+                            <span class="text-cyber-green font-bold">[RED TEAMING]</span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-cyber-red font-semibold">CyberWarfare Labs</span>
+                        </div>
+                        <h4 class="text-lg font-mono font-bold text-white mb-1">Active Directory Red Team Specialist</h4>
+                        <p class="text-xs text-gray-300 font-sans max-w-2xl leading-relaxed">
+                            Specialized AD attacks including Kerberos exploitation (Kerberoasting, AS-REP Roasting), domain enumeration, lateral movement, and privilege escalation.
+                        </p>
+                    </div>
+                </div>
+                <a href="https://labs.cyberwarfare.live/credential/achievement/6980ae3f6d896ee8347540d3" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-cyber-dark border border-cyber-green/50 text-cyber-green hover:bg-cyber-green hover:text-black font-mono font-bold text-xs rounded transition-all whitespace-nowrap self-end sm:self-center">
+                    &rarr; Verify Credential
+                </a>
+            </div>
+
+            <!-- Cert 4: Cisco Junior Cyber Security Analyst -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 rounded-xl p-2 flex items-center justify-center shrink-0 border border-cyber-border">
+                        <img src="https://images.credly.com/size/340x340/images/22e03290-b183-4a17-8178-9e3204990928/image.png" 
+                             alt="Cisco Security Analyst" 
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://cdn.simpleicons.org/cisco/1BA0D7';" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs mb-1">
+                            <span class="text-cyber-green font-bold">[SOC OPERATIONS]</span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-cyber-red font-semibold">Cisco Networking Academy</span>
+                        </div>
+                        <h4 class="text-lg font-mono font-bold text-white mb-1">Cisco Junior Cyber Security Analyst</h4>
+                        <p class="text-xs text-gray-300 font-sans max-w-2xl leading-relaxed">
+                            Network defense fundamentals, packet inspection, intrusion detection systems, endpoint protection, and SOC analyst workflows.
+                        </p>
+                    </div>
+                </div>
+                <a href="https://www.netacad.com/certificates/?issuanceId=d93c2413-b57d-4d25-9a31-9986d1e2e2cb" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-cyber-dark border border-cyber-green/50 text-cyber-green hover:bg-cyber-green hover:text-black font-mono font-bold text-xs rounded transition-all whitespace-nowrap self-end sm:self-center">
+                    &rarr; Verify Credential
+                </a>
+            </div>
+
+            <!-- Cert 5: Google Cybersecurity Professional -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-5 hover:border-cyber-green transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 rounded-xl p-2.5 flex items-center justify-center shrink-0 border border-cyber-border">
+                        <img src="https://images.credly.com/size/340x340/images/bf036a16-43a5-4299-a417-8a6c51ff106a/GCC_badge_cybersecurity_300x300.png" 
+                             alt="Google Cybersecurity" 
+                             class="max-w-full max-h-full object-contain"
+                             onerror="this.src='https://cdn.simpleicons.org/google/4285F4';" />
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 font-mono text-xs mb-1">
+                            <span class="text-cyber-green font-bold">[DEFENSIVE SEC]</span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-cyber-red font-semibold">Google / Coursera</span>
+                        </div>
+                        <h4 class="text-lg font-mono font-bold text-white mb-1">Google Cybersecurity Professional</h4>
+                        <p class="text-xs text-gray-300 font-sans max-w-2xl leading-relaxed">
+                            Python automation, Linux administration, SQL, SIEM platforms, and threat detection frameworks (NIST, MITRE ATT&CK).
+                        </p>
+                    </div>
+                </div>
+                <a href="https://www.credly.com/users/chinmay-panda.1082fc82/badges/credly" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-cyber-dark border border-cyber-green/50 text-cyber-green hover:bg-cyber-green hover:text-black font-mono font-bold text-xs rounded transition-all whitespace-nowrap self-end sm:self-center">
+                    &rarr; Verify Credential
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="publications" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x04]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">PUBLICATION_PAPER</h3>
+        </div>
+
+        <div class="bg-cyber-card border border-cyber-red/50 rounded-xl p-6 sm:p-8 relative overflow-hidden border-glow-red">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-cyber-red text-9xl pointer-events-none">
+                <i class="fa-solid fa-file-contract"></i>
+            </div>
+
+            <div class="flex items-center space-x-2 text-xs font-mono text-cyber-red mb-3">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>INTERNATIONAL JOURNAL PUBLICATION</span>
+            </div>
+
+            <h4 class="text-xl sm:text-2xl font-bold font-mono text-white mb-3">
+                SwiftAid: An AI-Driven Ambulance Dispatch and Route Optimization Platform for Dense Urban Environments
+            </h4>
+
+            <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 font-sans max-w-4xl">
+                Published research presenting an AI-driven platform designed for real-time emergency dispatch and route optimization in dense urban settings. The paper addresses critical system architecture, algorithmic routing optimization, and platform security considerations.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="https://ijcope.org/article/swiftaid-an-ai-driven-ambulance-dispatch-and-route-optimization-platform-for-dense-urban-environments/" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded bg-cyber-red text-white font-mono font-bold text-xs hover:bg-red-600 transition-all flex items-center gap-2 shadow-lg shadow-cyber-red/20">
+                    <i class="fa-solid fa-globe"></i> VIEW DIRECT PAPER LINK (IJCOPE)
+                </a>
+                <a href="https://medium.com/@chinmaypandarkl" target="_blank" rel="noopener noreferrer" class="px-5 py-2.5 rounded bg-cyber-dark border border-cyber-border text-gray-300 font-mono text-xs hover:text-cyber-green transition-all flex items-center gap-2">
+                    <i class="fa-brands fa-medium"></i> AUTHOR PROFILE ON MEDIUM
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x05]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">FEATURED_PROJECTS_&_LABS</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Project 1: Active Directory Wazuh SIEM -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-green"><i class="fa-solid fa-shield-halved mr-1"></i> DEFENSIVE / SIEM</span>
+                        <span class="text-[10px] font-mono bg-cyber-dark text-gray-400 px-2 py-0.5 rounded border border-cyber-border">LAB REPORT</span>
+                    </div>
+                    <h4 class="text-lg font-bold font-mono text-white mb-2">Active Directory Security Monitoring with Wazuh SIEM</h4>
+                    <p class="text-gray-300 text-sm mb-4 font-sans leading-relaxed">
+                        Implemented centralized Wazuh SIEM monitoring for Active Directory environments. Configured custom rules for real-time detection of brute-force attacks and privileged account changes; improved alert fidelity and investigation workflows.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-cyber-green rounded">Wazuh SIEM</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Active Directory</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Bash</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2: Cache Side Channel -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-green"><i class="fa-solid fa-microchip mr-1"></i> SYSTEM SECURITY</span>
+                        <span class="text-[10px] font-mono bg-cyber-dark text-gray-400 px-2 py-0.5 rounded border border-cyber-border">RESEARCH</span>
+                    </div>
+                    <h4 class="text-lg font-bold font-mono text-white mb-2">Mitigating Cache-Based Side-Channel Attacks</h4>
+                    <p class="text-gray-300 text-sm mb-4 font-sans leading-relaxed">
+                        Developed mitigation strategies for cache-based side-channel attacks by implementing improved cache management techniques and detection logic to reduce information leakage.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-cyber-green rounded">Python</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Bash</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Memory Security</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 3: Cognitive Honeypot -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-green"><i class="fa-solid fa-brain mr-1"></i> DECEPTION & AI</span>
+                        <span class="text-[10px] font-mono bg-cyber-dark text-gray-400 px-2 py-0.5 rounded border border-cyber-border">INNOVATION</span>
+                    </div>
+                    <h4 class="text-lg font-bold font-mono text-white mb-2">Cognitive Honeypot for Emotion-Aware Attacker Profiling</h4>
+                    <p class="text-gray-300 text-sm mb-4 font-sans leading-relaxed">
+                        Developed an AI-driven cognitive honeypot that uses NLP and behavioral analysis to simulate human-like interaction, enabling real-time emotion detection and attacker profiling for advanced cyber deception.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-cyber-green rounded">AI / NLP</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Behavioral Analytics</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Deception Tech</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 4: Malware Reverse Engineering (Cleaned without GitHub button) -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-green"><i class="fa-solid fa-bug mr-1"></i> REVERSE ENGINEERING</span>
+                        <span class="text-[10px] font-mono bg-cyber-dark text-gray-400 px-2 py-0.5 rounded border border-cyber-border">ANALYSIS TOOLING</span>
+                    </div>
+                    <h4 class="text-lg font-bold font-mono text-white mb-2">Reverse Engineering for Malware Analysis</h4>
+                    <p class="text-gray-300 text-sm mb-4 font-sans leading-relaxed">
+                        Created automation scripts and tooling for static and dynamic malware analysis to improve detection, triage, and IOC extraction.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-2 text-xs font-mono">
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-cyber-green rounded">Python</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">Static/Dynamic Analysis</span>
+                        <span class="px-2 py-0.5 bg-cyber-dark border border-cyber-border text-gray-300 rounded">IOC Extraction</span>
+                    </div>
+                    
+                </div>
+            </div>
+
+        </div>
+        <div class="mt-8 text-center">
+            <a href="https://github.com/Chinmaypanda34" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-6 py-3 rounded bg-cyber-card border border-cyber-border text-gray-300 font-mono text-sm hover:border-cyber-green hover:text-cyber-green transition-all">
+                <i class="fa-brands fa-github text-base"></i>
+                <span>VISIT CHINMAY'S FULL GITHUB PROFILE</span>
+            </a>
+        </div>
+    </section>
+
+    <section id="tools" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+
+
+    <!-- ─── HEADER ─── -->
+    <div class="border-l-4 border-cyber-red pl-4 mb-3">
+        <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x06]</h2>
+        <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">SECURITY_ARSENAL_&amp;_TOOLS</h3>
+    </div>
+
+    <!-- ─── DEFINITION ─── -->
+    <div class="bg-cyber-card/80 border border-cyber-border rounded-lg p-4 mb-8 font-mono text-xs text-gray-300 leading-relaxed">
+        <p><span class="text-cyber-green font-bold">&gt; WHAT IS A SECURITY ARSENAL?</span> It is the complete collection of software, frameworks, SIEM platforms, and command-line security tools utilized during offensive auditing and defensive monitoring engagements.</p>
+    </div>
+
+    <!-- ─── TAB BUTTONS ─── -->
+    <div class="flex flex-wrap gap-1 sm:gap-2 mb-6 border-b border-cyber-border/60 pb-0 overflow-x-auto" id="tabNav">
+
+        <button class="tab-btn active" data-tab="tab-siem" data-color="green">
+            <span class="text-xs font-mono font-bold text-cyber-green">[01]</span>
+            <span class="text-sm font-mono font-medium text-white/90">SIEM &amp; SOC OPERATIONS</span>
+        </button>
+
+        <button class="tab-btn" data-tab="tab-offensive" data-color="red">
+            <span class="text-xs font-mono font-bold text-cyber-red">[02]</span>
+            <span class="text-sm font-mono font-medium text-white/90">OFFENSIVE &amp; PENTESTING</span>
+        </button>
+
+        <button class="tab-btn" data-tab="tab-ad" data-color="green">
+            <span class="text-xs font-mono font-bold text-cyber-green">[03]</span>
+            <span class="text-sm font-mono font-medium text-white/90">AD &amp; CLOUD IDENTITY</span>
+        </button>
+
+        <button class="tab-btn" data-tab="tab-dfir" data-color="red">
+            <span class="text-xs font-mono font-bold text-cyber-red">[04]</span>
+            <span class="text-sm font-mono font-medium text-white/90">DFIR &amp; THREAT INTEL</span>
+        </button>
+
+        <button class="tab-btn" data-tab="tab-scripting" data-color="green">
+            <span class="text-xs font-mono font-bold text-cyber-green">[05]</span>
+            <span class="text-sm font-mono font-medium text-white/90">SCRIPTING &amp; OS</span>
+        </button>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL [01] – SIEM & SOC                                      -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-siem" class="tab-panel active">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Microsoft Sentinel -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://framerusercontent.com/images/WgJj6qkPvRnltObIHVwQaUn1FtM.png?scale-down-to=512&width=866&height=650" alt="Microsoft Sentinel" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Microsoft Sentinel</h5>
+                    <p class="text-xs text-gray-400 font-sans">Cloud-native SIEM on Azure</p>
+                </div>
+            </div>
+
+            <!-- Splunk -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/splunk/FF0080" alt="Splunk" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Splunk</h5>
+                    <p class="text-xs text-gray-400 font-sans">Enterprise SIEM &amp; Log Analysis</p>
+                </div>
+            </div>
+
+            <!-- Microsoft Defender for Endpoint (MDE) – fixed onerror -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Microsoft_Defender_Security_Center_logo.svg/1024px-Microsoft_Defender_Security_Center_logo.svg.png" alt="Defender" class="w-8 h-8 object-contain"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Crect width=%2240%22 height=%2240%22 fill=%22%2310111a%22 rx=%228%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 fill=%22%2300ff66%22 font-family=%22monospace%22 font-size=%2214%22%3E🔒%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Defender for Endpoint</h5>
+                    <p class="text-xs text-gray-400 font-sans">Enterprise EDR &amp; threat response</p>
+                </div>
+            </div>
+
+            <!-- Wazuh SIEM -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-server text-cyber-green text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Wazuh SIEM</h5>
+                    <p class="text-xs text-gray-400 font-sans">Open Source XDR &amp; SIEM</p>
+                </div>
+            </div>
+
+            <!-- Suricata -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-shield-virus text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Suricata</h5>
+                    <p class="text-xs text-gray-400 font-sans">High performance IDS/IPS engine</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL [02] – OFFENSIVE & PENTESTING                         -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-offensive" class="tab-panel" style="display:none;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Burp Suite -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/burpsuite/FF6600" alt="Burp Suite" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">BurpSuite</h5>
+                    <p class="text-xs text-gray-400 font-sans">Web vulnerability testing tool</p>
+                </div>
+            </div>
+
+            <!-- Nmap -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-satellite-dish text-cyber-green text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Nmap</h5>
+                    <p class="text-xs text-gray-400 font-sans">Network discovery &amp; NSE scripts</p>
+                </div>
+            </div>
+
+            <!-- Nessus -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://framerusercontent.com/images/mTZ68OBUdMmBqqeo3GBqDlk.png?scale-down-to=512&width=1080&height=1080" alt="Nessus" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Nessus</h5>
+                    <p class="text-xs text-gray-400 font-sans">Vulnerability assessment scanner</p>
+                </div>
+            </div>
+
+            <!-- Metasploit -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/metasploit/2569C5" alt="Metasploit" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Metasploit</h5>
+                    <p class="text-xs text-gray-400 font-sans">Exploit framework for pentesting</p>
+                </div>
+            </div>
+
+            <!-- Sliver C2 -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-terminal text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Sliver C2</h5>
+                    <p class="text-xs text-gray-400 font-sans">Adversary simulation &amp; C2 framework</p>
+                </div>
+            </div>
+
+            <!-- Impacket -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-code text-cyber-green text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Impacket</h5>
+                    <p class="text-xs text-gray-400 font-sans">Network protocol exploitation toolkit</p>
+                </div>
+            </div>
+
+            <!-- Evil-WinRM -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-door-open text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Evil-WinRM</h5>
+                    <p class="text-xs text-gray-400 font-sans">Windows Remote Management shell</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL [03] – AD & CLOUD IDENTITY                            -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-ad" class="tab-panel" style="display:none;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Active Directory -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-building-user text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Active Directory</h5>
+                    <p class="text-xs text-gray-400 font-sans">Domain Controller &amp; GPO security</p>
+                </div>
+            </div>
+
+            <!-- BloodHound -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://framerusercontent.com/images/kfZdiOcjPNHiVxxSzxzX51jzj4I.svg?width=512&height=512" alt="BloodHound" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">BloodHound</h5>
+                    <p class="text-xs text-gray-400 font-sans">Active Directory attack path mapping</p>
+                </div>
+            </div>
+
+            <!-- Microsoft Entra ID – fixed onerror -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/microsoft/00A4EF" alt="Entra ID" class="w-8 h-8 object-contain"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Crect width=%2240%22 height=%2240%22 fill=%22%2310111a%22 rx=%228%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 fill=%22%2300a4ef%22 font-family=%22monospace%22 font-size=%2216%22%3E🔑%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Microsoft Entra ID</h5>
+                    <p class="text-xs text-gray-400 font-sans">Azure Cloud IAM &amp; Identity</p>
+                </div>
+            </div>
+
+            <!-- Microsoft Intune -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-laptop-medical text-cyber-green text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Microsoft Intune</h5>
+                    <p class="text-xs text-gray-400 font-sans">Endpoint Management &amp; Compliance</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL [04] – DFIR & THREAT INTEL                            -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-dfir" class="tab-panel" style="display:none;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Wireshark -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/wireshark/167EEF" alt="Wireshark" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Wireshark</h5>
+                    <p class="text-xs text-gray-400 font-sans">Network protocol analysis tool</p>
+                </div>
+            </div>
+
+            <!-- VirusTotal -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-virus text-cyber-green text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">VirusTotal</h5>
+                    <p class="text-xs text-gray-400 font-sans">File &amp; URL threat intelligence</p>
+                </div>
+            </div>
+
+            <!-- REMnux -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-box-archive text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">REMnux</h5>
+                    <p class="text-xs text-gray-400 font-sans">Reverse engineering Linux distro</p>
+                </div>
+            </div>
+
+            <!-- KQL Query -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <i class="fa-solid fa-code text-cyber-red text-2xl"></i>
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">KQL Query</h5>
+                    <p class="text-xs text-gray-400 font-sans">Kusto Query Language for Sentinel</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- PANEL [05] – SCRIPTING & OS                                 -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <div id="tab-scripting" class="tab-panel" style="display:none;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Python 3 -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/python/3776AB" alt="Python" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Python 3</h5>
+                    <p class="text-xs text-gray-400 font-sans">Security automation &amp; scripting</p>
+                </div>
+            </div>
+
+            <!-- Bash / Shell -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/gnubash/4EAA25" alt="Bash" class="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">Bash / Shell</h5>
+                    <p class="text-xs text-gray-400 font-sans">Linux administration &amp; CLI</p>
+                </div>
+            </div>
+
+            <!-- PowerShell – fixed onerror -->
+            <div class="bg-cyber-card border border-cyber-border p-4 rounded-xl flex items-center space-x-4 hover:border-cyber-green transition-all">
+                <div class="w-12 h-12 bg-cyber-dark rounded-lg p-2 shrink-0 border border-cyber-border flex items-center justify-center">
+                    <img src="https://cdn.simpleicons.org/powershell/53C1DE" alt="PowerShell" class="w-8 h-8 object-contain"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Crect width=%2240%22 height=%2240%22 fill=%22%2310111a%22 rx=%228%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 fill=%22%2353c1de%22 font-family=%22monospace%22 font-size=%2216%22%3E⚡%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div>
+                    <h5 class="font-mono text-sm font-bold text-white">PowerShell</h5>
+                    <p class="text-xs text-gray-400 font-sans">Windows administration &amp; Red Teaming</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</section>
+
+    <section id="blogs" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x07]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">SECURITY_BLOGS_&_PDF_REPORTS</h3>
+        </div>
+
+        <!-- Medium Writeups Grid -->
+        <h4 class="text-lg font-mono font-bold text-cyber-green mb-4 flex items-center">
+            <i class="fa-brands fa-medium mr-2"></i> Medium Walkthroughs & Writeups
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            
+            <!-- Blog 1 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-400 mb-2">
+                        <span class="text-cyber-red font-bold"><i class="fa-brands fa-medium mr-1"></i> TRYHACKME</span>
+                        <span>APR 5</span>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">TryHackMe “RA” Writeup: From Confusion to Full Domain Compromise</h5>
+                    <p class="text-gray-300 text-xs font-sans mb-4 leading-relaxed">
+                        You have found WindCorp’s internal network and its Domain Controller. Can you pwn their network? Step-by-step AD domain controller compromise.
+                    </p>
+                </div>
+                <a href="https://medium.com/@chinmaypandarkl/tryhackme-ra-writeup-from-confusion-to-full-domain-compromise-f3a1912961cc" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyber-green hover:underline flex items-center">
+                    Read Article on Medium <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Blog 2 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-400 mb-2">
+                        <span class="text-cyber-red font-bold"><i class="fa-brands fa-medium mr-1"></i> TRYHACKME</span>
+                        <span>MAR 22</span>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">TryHackMe: Enterprise Full Walkthrough</h5>
+                    <p class="text-gray-300 text-xs font-sans mb-4 leading-relaxed">
+                        You just landed in an internal network. You scan the network, and there’s only the Domain Controller...
+                    </p>
+                </div>
+                <a href="https://medium.com/@chinmaypandarkl/tryhackme-enterprise-full-walkthrough-b583ab9567f2" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyber-green hover:underline flex items-center">
+                    Read Article on Medium <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Blog 3 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-400 mb-2">
+                        <span class="text-cyber-red font-bold"><i class="fa-brands fa-medium mr-1"></i> TRYHACKME</span>
+                        <span>MAR 20</span>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">TryHackMe: The Marketplace — Full Walkthrough (XSS &rarr; SQLi &rarr; PrivEsc)</h5>
+                    <p class="text-gray-300 text-xs font-sans mb-4 leading-relaxed">
+                        Can you take over The Marketplace’s infrastructure? Chaining web application flaws to gain root access.
+                    </p>
+                </div>
+                <a href="https://medium.com/@chinmaypandarkl/tryhackme-the-marketplace-full-walkthrough-xss-sqli-privilege-escalation-75aea5e81bde" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyber-green hover:underline flex items-center">
+                    Read Article on Medium <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Blog 4 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-green transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between text-xs font-mono text-gray-400 mb-2">
+                        <span class="text-cyber-red font-bold"><i class="fa-brands fa-medium mr-1"></i> TRYHACKME</span>
+                        <span>WRITEUP</span>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">TryHackMe CMesS Writeup & Machine Exploitation</h5>
+                    <p class="text-gray-300 text-xs font-sans mb-4 leading-relaxed">
+                        Subdomain fuzzing, credential exposure, and Linux cronjob privilege escalation walkthrough.
+                    </p>
+                </div>
+                <a href="https://medium.com/@chinmaypandarkl/tryhackme-cmess-writeup-508eedbcf9db" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-cyber-green hover:underline flex items-center">
+                    Read Article on Medium <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Technical PDF Reports Section -->
+        <h4 class="text-lg font-mono font-bold text-cyber-red mb-4 flex items-center">
+            <i class="fa-solid fa-file-pdf mr-2"></i> PDF Technical Reports & Security Documentation
+        </h4>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            <!-- PDF Document Card 1 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-red transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-red bg-cyber-dark px-2.5 py-1 rounded border border-cyber-border font-bold">VPT REPORT</span>
+                        <i class="fa-solid fa-file-shield text-cyber-red text-2xl"></i>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">Vulnerability Assessment & Penetration Test Report</h5>
+                    <p class="text-xs text-gray-300 font-sans mb-4 leading-relaxed">
+                        Structured executive & technical security audit report documenting discovered OWASP vulnerabilities, severity scoring, CVSS vector calculations, and remediation recommendations.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3 pt-3 border-t border-cyber-border/60">
+                    <button onclick="viewPdfModal('Vulnerability Assessment Report', 'reports/Vulnerability Assessment Report 2.pdf')" class="px-4 py-2 bg-cyber-red text-white font-mono font-bold text-xs rounded hover:bg-red-600 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye"></i> PREVIEW REPORT
+                    </button>
+                </div>
+            </div>
+
+            <!-- PDF Document Card 2 -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 hover:border-cyber-red transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-mono text-cyber-red bg-cyber-dark px-2.5 py-1 rounded border border-cyber-border font-bold">WIRELESS SEC</span>
+                        <i class="fa-solid fa-wifi text-cyber-green text-2xl"></i>
+                    </div>
+                    <h5 class="text-base font-bold font-mono text-white mb-2">Security Analysis of WPA2-PSK via 4-Way Handshake Capture & Cracking</h5>
+                    <p class="text-xs text-gray-300 font-sans mb-4 leading-relaxed">
+                        In-depth technical document exploring IEEE 802.11 Wi-Fi security mechanisms, 4-way EAPOL handshake packet analysis, offline dictionary attacks, and defense configurations.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3 pt-3 border-t border-cyber-border/60">
+                    <button onclick="viewPdfModal('Security Analysis of WPA2-PSK', 'reports/Mini Guide On WIFI Password Crack.pdf')" class="px-4 py-2 bg-cyber-red text-white font-mono font-bold text-xs rounded hover:bg-red-600 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye"></i> PREVIEW REPORT
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Interactive PDF Viewer Modal -->
+    <div id="pdfModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl bg-cyber-card border border-cyber-red/50 rounded-lg shadow-2xl overflow-hidden font-mono text-sm flex flex-col h-[85vh]">
+            <div class="bg-cyber-dark px-4 py-3 border-b border-cyber-border flex items-center justify-between">
+                <span id="pdfModalTitle" class="text-cyber-green font-bold text-xs sm:text-sm truncate">PDF Viewer</span>
+                <button onclick="closePdfModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 bg-cyber-dark p-2 relative flex items-center justify-center">
+                <iframe id="pdfFrame" src="" class="w-full h-full rounded border border-cyber-border" frameborder="0"></iframe>
+            </div>
+            <div class="bg-cyber-dark/90 p-3 border-t border-cyber-border text-xs text-gray-400 flex items-center justify-between">
+                <span>Save PDF files in a <code class="text-cyber-green">reports/</code> folder in your repository to load custom PDFs.</span>
+                <button onclick="closePdfModal()" class="px-3 py-1 bg-cyber-border text-white rounded hover:bg-cyber-red transition-all">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <section id="contact" class="scroll-mt-24 relative z-20 py-12 sm:py-16 px-4 max-w-7xl mx-auto">
+        <div class="border-l-4 border-cyber-red pl-4 mb-8">
+            <h2 class="text-xs font-mono text-cyber-red uppercase tracking-widest">[SECTION 0x08]</h2>
+            <h3 class="text-2xl sm:text-3xl font-display font-bold text-white tracking-wide">ESTABLISH_CONNECTION</h3>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Contact Info Panel -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                    <h4 class="text-xl font-bold font-mono text-white mb-3">Let's Connect & Secure</h4>
+                    <p class="text-gray-300 text-sm mb-6 font-sans">
+                        I am currently seeking full-time roles as a <strong>SOC Analyst, Penetration Tester, or Security Analyst</strong>. Feel free to contact me directly!
+                    </p>
+
+                    <div class="space-y-4 font-mono text-sm">
+                        
+                        <!-- One-Click Copy Email -->
+                        <div class="p-3 bg-cyber-dark border border-cyber-border rounded flex items-center justify-between">
+                            <div class="flex items-center space-x-3 overflow-hidden">
+                                <i class="fa-solid fa-envelope text-cyber-red text-lg"></i>
+                                <span id="myEmailText" class="text-gray-200 truncate">chinmaypandarkl@gmail.com</span>
+                            </div>
+                            <button onclick="copyEmail()" class="px-3 py-1 bg-cyber-border hover:bg-cyber-green hover:text-black rounded text-xs text-gray-300 transition-all shrink-0">
+                                <span id="copyBtnText">COPY</span>
+                            </button>
+                        </div>
+
+                        <!-- LinkedIn -->
+                        <a href="https://www.linkedin.com/in/chinmaypanda01/" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded flex items-center justify-between hover:border-cyber-green transition-all block">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-brands fa-linkedin text-cyber-green text-lg"></i>
+                                <span class="text-gray-200 truncate">linkedin.com/in/chinmaypanda01</span>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400"></i>
+                        </a>
+
+                        <!-- GitHub -->
+                        <a href="https://github.com/Chinmaypanda34" target="_blank" class="p-3 bg-cyber-dark border border-cyber-border rounded flex items-center justify-between hover:border-cyber-green transition-all block">
+                            <div class="flex items-center space-x-3">
+                                <i class="fa-brands fa-github text-cyber-green text-lg"></i>
+                                <span class="text-gray-200 truncate">github.com/Chinmaypanda34</span>
+                            </div>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-cyber-border">
+                    <a href="mailto:chinmaypandarkl@gmail.com?subject=Opportunity%20/%20Inquiry%20for%20Chinmay%20Panda" class="w-full py-3 bg-cyber-red hover:bg-red-600 text-white font-mono font-bold text-center rounded text-sm transition-all block shadow-lg shadow-cyber-red/20">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> DIRECT ONE-CLICK EMAIL
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Mail Writer Form -->
+            <div class="bg-cyber-card border border-cyber-border rounded-xl p-6 sm:p-8">
+                <h4 class="text-xl font-bold font-mono text-white mb-2">Quick Email Dispatch</h4>
+                <p class="text-xs text-gray-400 mb-6">Fills your desktop/mobile email client automatically.</p>
+
+                <form onsubmit="sendQuickEmail(event)" class="space-y-4 font-mono text-sm">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">YOUR NAME / ORGANIZATION</label>
+                        <input id="senderName" type="text" required class="w-full bg-cyber-dark border border-cyber-border rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-cyber-green text-xs" placeholder="e.g. Recruiter / Security Lead" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">SUBJECT</label>
+                        <input id="emailSubject" type="text" required class="w-full bg-cyber-dark border border-cyber-border rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-cyber-green text-xs" placeholder="Job Opportunity / Security Engagement" />
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">MESSAGE</label>
+                        <textarea id="emailMessage" rows="4" required class="w-full bg-cyber-dark border border-cyber-border rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-cyber-green text-xs" placeholder="Hi Chinmay, we reviewed your cybersecurity portfolio..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-cyber-card border border-cyber-green text-cyber-green font-bold text-xs rounded hover:bg-cyber-green/10 transition-all border-glow-green">
+                        SEND VIA EMAIL CLIENT <i class="fa-solid fa-paper-plane ml-1"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-20 border-t border-cyber-border/80 py-8 text-center font-mono text-xs text-gray-500 bg-cyber-dark">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                &copy; <span id="currYear"></span> Chinmay Panda. All rights reserved.
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-cyber-green"><i class="fa-solid fa-terminal mr-1"></i>SEC_PORTFOLIO_V2.0</span>
+                <span>GITHUB PAGES HOSTED</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('currYear').innerText = new Date().getFullYear();
+
+        // Mobile Menu Toggle Functions
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+
+        // Copy Email to Clipboard
+        function copyEmail() {
+            const emailText = "chinmaypandarkl@gmail.com";
+            
+            const tempInput = document.createElement("textarea");
+            tempInput.value = emailText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            const copyBtnText = document.getElementById('copyBtnText');
+            copyBtnText.innerText = "COPIED!";
+            copyBtnText.classList.add("text-cyber-green");
+
+            setTimeout(() => {
+                copyBtnText.innerText = "COPY";
+                copyBtnText.classList.remove("text-cyber-green");
+            }, 2500);
+        }
+
+        // Send Email via mailto trigger
+        function sendQuickEmail(e) {
+            e.preventDefault();
+            const name = document.getElementById('senderName').value;
+            const subject = document.getElementById('emailSubject').value;
+            const body = document.getElementById('emailMessage').value;
+            
+            const fullBody = `Name/Org: ${name}\n\nMessage:\n${body}`;
+            window.location.href = `mailto:chinmaypandarkl@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullBody)}`;
+        }
+
+        // Terminal CLI Modal Toggle
+        function toggleTerminalModal() {
+            const modal = document.getElementById('terminalModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('terminalInput').focus();
+            }
+        }
+
+        // PDF Modal Functions
+        function viewPdfModal(title, pdfPath) {
+            const modal = document.getElementById('pdfModal');
+            const frame = document.getElementById('pdfFrame');
+            const modalTitle = document.getElementById('pdfModalTitle');
+
+            modalTitle.innerText = "PREVIEW: " + title;
+            frame.src = pdfPath;
+            modal.classList.remove('hidden');
+        }
+
+        function closePdfModal() {
+            const modal = document.getElementById('pdfModal');
+            const frame = document.getElementById('pdfFrame');
+            frame.src = "";
+            modal.classList.add('hidden');
+        }
+
+        // Terminal Command Processor
+        const termInput = document.getElementById('terminalInput');
+        const termOutput = document.getElementById('terminalOutput');
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = this.value.trim().toLowerCase();
+                this.value = '';
+
+                const promptLine = document.createElement('p');
+                promptLine.className = 'text-gray-400';
+                promptLine.innerHTML = `<span class="text-cyber-green font-bold">chinmay@security:~$</span> ${cmd}`;
+                termOutput.appendChild(promptLine);
+
+                const responseLine = document.createElement('p');
+                responseLine.className = 'text-gray-200 text-xs my-1';
+
+                switch(cmd) {
+                    case 'help':
+                        responseLine.innerHTML = `Available commands: <br>
+                        - <span class="text-cyber-green">whoami</span> : Print bio summary<br>
+                        - <span class="text-cyber-green">skills</span> : List security technical skills & tools<br>
+                        - <span class="text-cyber-green">achievements</span> : CTF rankings & honors<br>
+                        - <span class="text-cyber-green">certs</span> : Certifications & badge links<br>
+                        - <span class="text-cyber-green">clear</span> : Clear screen`;
+                        break;
+                    case 'whoami':
+                        responseLine.innerText = "Chinmay Panda | Cybersecurity Analyst & Penetration Tester holding CompTIA Security+, eJPTv2, and Active Directory Red Team Specialist credentials.";
+                        break;
+                    case 'skills':
+                        responseLine.innerText = "Microsoft Sentinel, Splunk, Wazuh SIEM, Burp Suite, Nmap, Sliver C2, Metasploit, BloodHound, Impacket, Python, Bash, PowerShell.";
+                        break;
+                    case 'achievements':
+                        responseLine.innerText = "Top 350 AICTE CTF 2024, Solved 7 Flags TCS HackQuest S9, Top 300-400 Pentathlon 2025 (9 Flags), THM Rank #9,126.";
+                        break;
+                    case 'certs':
+                        responseLine.innerText = "CompTIA Security+, eJPTv2 (INE), AD Red Team Specialist (CyberWarfare Labs), Cisco Junior Cyber Security Analyst, Google Cybersecurity.";
+                        break;
+                    case 'clear':
+                        termOutput.innerHTML = '';
+                        return;
+                    default:
+                        responseLine.innerHTML = `<span class="text-cyber-red">Command '${cmd}' not found. Type 'help' for options.</span>`;
+                }
+
+                termOutput.appendChild(responseLine);
+                termOutput.scrollTop = termOutput.scrollHeight;
+            }
+        });
+
+        /* Matrix Background Canvas Animation */
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = '01ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>/';
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * -100;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(8, 8, 12, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = fontSize + 'px "Fira Code", monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                
+                const rand = Math.random();
+                if (rand > 0.95) {
+                    ctx.fillStyle = '#ff2a4b';
+                } else if (rand > 0.8) {
+                    ctx.fillStyle = '#00ff66';
+                } else {
+                    ctx.fillStyle = '#005522';
+                }
+
+                ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        window.onload = function() {
+            setInterval(drawMatrix, 40);
+        };
+
+        // ════════════════════════════════════════════════════════════
+        // ─── SECURITY ARSENAL TAB SWITCHER ───
+        // ════════════════════════════════════════════════════════════
+        (function initToolTabs() {
+            var tabButtons = document.querySelectorAll('.tab-btn');
+            var tabPanels = document.querySelectorAll('.tab-panel');
+
+            function switchToTab(tabKey) {
+                // Hide all panels
+                tabPanels.forEach(function(panel) {
+                    panel.classList.remove('active');
+                    panel.style.display = 'none';
+                });
+
+                // Deactivate all buttons
+                tabButtons.forEach(function(btn) {
+                    btn.classList.remove('active');
+                });
+
+                // Activate clicked button
+                var clickedBtn = document.querySelector('.tab-btn[data-tab="' + tabKey + '"]');
+                if (clickedBtn) {
+                    clickedBtn.classList.add('active');
+                }
+
+                // Show matching panel
+                var targetPanel = document.getElementById(tabKey);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                    targetPanel.style.display = 'block';
+                }
+            }
+
+            // Bind click listeners to every tab button
+            tabButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var tabKey = btn.getAttribute('data-tab');
+                    if (tabKey) {
+                        switchToTab(tabKey);
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
